@@ -44,22 +44,77 @@
         }
     </script>
     
-    <!-- Google Font & Font Awesome Icons -->
+    <!-- Google Fonts & Font Awesome Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     
-    <!-- Leaflet.js Peta Interaktif -->
+    <!-- Leaflet.js untuk Peta Interaktif -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <!-- Canvas Confetti untuk Gamifikasi -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-<link rel="stylesheet" href="style.css">
+    <!-- Custom Style Terpisah -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" 
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- ============================================== -->
+    <!-- 0. MODAL ONBOARDING PENDAFTARAN AWAL           -->
+    <!-- ============================================== -->
+    <div id="onboarding-modal" class="hidden fixed inset-0 z-[110] bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-200 dark:border-slate-700 my-8">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white mx-auto flex items-center justify-center text-2xl shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-house-chimney-medical"></i>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Pendaftaran Profil Keluarga</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Daftarkan data awal keluarga untuk menghubungkan gizi, riwayat penyakit, dan titik lokasi rumah.</p>
+            </div>
+
+            <form onsubmit="handleOnboardingSubmit(event)" class="space-y-4 text-xs">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">Nama Keluarga:</label>
+                        <input type="text" id="onboard-family-name" required placeholder="cth: Keluarga Cemara" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">Kepala Keluarga:</label>
+                        <input type="text" id="onboard-head-name" required placeholder="cth: Bpk. Suryadi" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold mb-1 text-slate-700 dark:text-slate-300">Pilih Lokasi Wilayah Rumah:</label>
+                    <select id="onboard-home-loc" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+                        <option value="loc1">Jl. Mawar No. 12 (Dekat Kebun Gizi RW 03)</option>
+                        <option value="loc2">Jl. Merdeka Selatan Blok B (Dekat Pasar Tradisional)</option>
+                        <option value="loc3">Kompleks Harapan Sehat RW 05 (Dekat Posko Gizi)</option>
+                    </select>
+                </div>
+
+                <div class="border-t border-slate-100 dark:border-slate-700 pt-3">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-bold text-slate-800 dark:text-slate-200">Daftar Anggota Keluarga & Riwayat Penyakit:</label>
+                        <button type="button" onclick="addOnboardMemberRow()" class="text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Tambah Anggota
+                        </button>
+                    </div>
+                    <div id="onboard-members-list" class="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                        <!-- Baris anggota awal disuntikkan via JS -->
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-xl shadow-md shadow-emerald-600/25 transition">
+                    Simpan Profil & Masuk ke Dashboard →
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- ============================================== -->
     <!-- PRELOADER DENGAN DURASI ~3 DETIK               -->
@@ -74,9 +129,14 @@
         <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white text-center leading-tight">
             PanganKeluarga
         </h1>
-        <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 tracking-widest uppercase mt-1.5 mb-8 text-center">
+        <p class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 tracking-widest uppercase mt-1.5 mb-2 text-center">
             Ketahanan Gizi Lintas Generasi
         </p>
+
+        <!-- Pesan Selamat Datang Personal -->
+        <h3 id="preloader-welcome-text" class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-8 text-center px-4">
+            Selamat datang!
+        </h3>
 
         <!-- Garis Loading Horizontal -->
         <div class="w-72 sm:w-88 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner relative">
@@ -107,7 +167,7 @@
                     </div>
                 </div>
 
-                <!-- Navigasi Menu Desktop (Sudah Disorot Jelas Saat Masuk) -->
+                <!-- Navigasi Menu Desktop (Beranda Aktif Default) -->
                 <nav class="hidden lg:flex space-x-1.5 text-xs font-semibold">
                     <button onclick="navigate('beranda')" id="nav-beranda" class="nav-item px-3.5 py-2 rounded-xl text-emerald-700 dark:text-emerald-300 font-bold bg-emerald-50 dark:bg-slate-800 border border-emerald-200 dark:border-emerald-700/50 transition shadow-xs">Beranda</button>
                     <button onclick="navigate('gizi')" id="nav-gizi" class="nav-item px-3.5 py-2 rounded-xl hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 transition">Panduan Gizi</button>
@@ -123,7 +183,7 @@
                         <i id="theme-icon" class="fa-solid fa-moon"></i>
                     </button>
 
-                    <!-- Widget Profil Keluarga (Bisa Diklik Untuk Ganti Nama) -->
+                    <!-- Profil Keluarga (Bisa Diklik Untuk Ganti Nama) -->
                     <div id="auth-section">
                         <!-- Disuntikkan JS -->
                     </div>
@@ -148,30 +208,30 @@
     </header>
 
     <!-- ============================================== -->
-    <!-- 2. KONTEN UTAMA (HALAMAN-HALAMAN TERPISAH)       -->
+    <!-- 2. KONTEN UTAMA (MULTI-PAGE SYSTEM)            -->
     <!-- ============================================== -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <!-- ================= PAGE 1: BERANDA ================= -->
         <section id="page-beranda" class="space-y-6">
-            <!-- Banner Sambutan -->
+            <!-- Banner Sambutan Dinamis -->
             <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
                 <div class="relative z-10 max-w-2xl space-y-3">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md text-emerald-100">
                         <i class="fa-solid fa-heart-pulse"></i> Indeks Ketahanan Pangan Keluarga
                     </span>
                     <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight" id="banner-greeting">
-                        Selamat Sehat, Keluarga Ibu Sari!
+                        Selamat Sehat, Keluarga!
                     </h1>
-                    <p class="text-emerald-100 text-xs sm:text-sm leading-relaxed">
-                        Pemberdayaan pangan bernutrisi seimbang dari bahan lokal untuk balita, anak, remaja, dewasa, hingga lansia tercinta.
+                    <p class="text-emerald-100 text-xs sm:text-sm leading-relaxed" id="banner-subgreeting">
+                        Memantau pemenuhan nutrisi dan pemetaan pangan lokal terjangkau.
                     </p>
                     <div class="pt-2 flex flex-wrap gap-3">
                         <button onclick="navigate('gizi')" class="px-5 py-2.5 bg-white text-emerald-800 font-bold text-xs rounded-xl shadow-md hover:bg-emerald-50 transition">
                             Cek Piring Gizi Hari Ini <i class="fa-solid fa-arrow-right ml-1"></i>
                         </button>
                         <button onclick="openEditFamilyModal()" class="px-5 py-2.5 bg-emerald-800/60 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl backdrop-blur-sm border border-emerald-400/30 transition">
-                            <i class="fa-solid fa-pen-to-square mr-1"></i> Ganti Nama Keluarga
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Ubah Data Profil
                         </button>
                     </div>
                 </div>
@@ -183,44 +243,49 @@
                     <div>
                         <span class="text-xs uppercase tracking-wider text-emerald-200 font-semibold block">Skor Ketahanan Pangan</span>
                         <h4 class="font-bold text-base">Aman & Terkontrol</h4>
-                        <span class="text-[11px] text-emerald-100" id="family-summary-badge">Memuat status keluarga...</span>
+                        <span class="text-[11px] text-emerald-100" id="family-summary-badge">Memuat status...</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Modul Cepat -->
+            <!-- Widget Deteksi Otomatis Masalah Penyakit & Hubungan Resep -->
+            <div id="disease-alert-section" class="space-y-3">
+                <!-- Disuntikkan JS sesuai riwayat penyakit anggota -->
+            </div>
+
+            <!-- Modul Cepat Navigasi -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div onclick="navigate('gizi')" class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 shadow-sm cursor-pointer transition group">
                     <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
                         <i class="fa-solid fa-chart-pie"></i>
                     </div>
                     <h3 class="font-bold text-base text-slate-900 dark:text-white">Isi Piringku 5 Siklus Hidup</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Takaran porsi tepat untuk balita, anak, remaja, dewasa aktif, hingga lansia.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Takaran porsi visual piring makanan untuk balita, anak, remaja, dewasa, hingga lansia.</p>
                 </div>
 
                 <div onclick="navigate('resep')" class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 shadow-sm cursor-pointer transition group">
                     <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
                         <i class="fa-solid fa-utensils"></i>
                     </div>
-                    <h3 class="font-bold text-base text-slate-900 dark:text-white">15 Resep Medis & Tumbuh Kembang</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Menu khusus anti-stunting, rendah garam hipertensi, dan glikemik rendah diabetes.</p>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white">15 Resep Medis Nusantara</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Menu khusus anti-stunting, rendah garam hipertensi, dan indeks glikemik rendah diabetes.</p>
                 </div>
 
                 <div onclick="navigate('komunitas')" class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 shadow-sm cursor-pointer transition group">
                     <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition">
-                        <i class="fa-solid fa-comments"></i>
+                        <i class="fa-solid fa-map-location-dot"></i>
                     </div>
-                    <h3 class="font-bold text-base text-slate-900 dark:text-white">Peta Posko & Ruang Berbagi Warga</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pantau titik pangan bersubsidi dan saling tanggapi kabar resep murah antar tetangga.</p>
+                    <h3 class="font-bold text-base text-slate-900 dark:text-white">Peta Posko & Lokasi Rumah</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Titik rumah keluarga Anda kini terhubung ke posko pangan dan pasar murah terdekat.</p>
                 </div>
             </div>
 
-            <!-- Profil Anggota Keluarga Terdaftar (Otomatis Umur & Kategori) -->
+            <!-- Profil Anggota Keluarga Terdaftar -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xs">
                 <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
                     <div>
                         <h3 class="font-bold text-slate-900 dark:text-white text-base">Profil Anggota Keluarga Terdaftar</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Umur dan kategori diidentifikasi otomatis berdasarkan tanggal lahir.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Umur dan siklus generasi diidentifikasi otomatis dari tanggal lahir.</p>
                     </div>
                     <button onclick="openAddMemberModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition">
                         <i class="fa-solid fa-user-plus"></i> Tambah Anggota
@@ -236,10 +301,10 @@
         <section id="page-gizi" class="hidden space-y-6">
             <div class="text-center max-w-2xl mx-auto space-y-2">
                 <h2 class="text-2xl font-black text-slate-900 dark:text-white">Kalkulator Visual "Isi Piringku"</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Pembagian proporsi gizi seimbang: 1/3 Makanan Pokok, 1/3 Sayuran, 1/6 Lauk Pauk, dan 1/6 Buah-buahan sesuai siklus hidup.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Pilih siklus hidup untuk melihat porsi visual makanan, rekomendasi resep, dan anggota keluarga yang bersangkutan.</p>
             </div>
 
-            <!-- Filter Siklus Hidup (Ditambahkan Remaja) -->
+            <!-- Tab Siklus Hidup (Balita, Anak, Remaja, Dewasa, Lansia) -->
             <div class="flex justify-center gap-2 overflow-x-auto pb-2">
                 <button onclick="setLifeCycle('balita')" id="btn-cycle-balita" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition">👶 Balita (&lt;5 Thn)</button>
                 <button onclick="setLifeCycle('anak')" id="btn-cycle-anak" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition">🧒 Anak (5-11 Thn)</button>
@@ -248,51 +313,79 @@
                 <button onclick="setLifeCycle('lansia')" id="btn-cycle-lansia" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition">👵 Lansia (&ge;60 Thn)</button>
             </div>
 
-            <!-- Visualisasi Piring Interaktif -->
+            <!-- Kartu Anggota Keluarga di Kategori Terpilih -->
+            <div id="cycle-members-alert" class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200">
+                <!-- Disuntikkan JS -->
+            </div>
+
+            <!-- Diagram Piring Visual dengan Contoh Makanan Asli & Diagram Irisan -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm items-center">
+                <!-- Piring Visual Nyata Berdiagram -->
                 <div class="lg:col-span-6 flex flex-col items-center">
-                    <div class="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full pie-plate shadow-xl border-8 border-slate-100 dark:border-slate-700 flex items-center justify-center">
-                        <div class="w-16 h-16 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl font-bold">
-                            <i class="fa-solid fa-utensils"></i>
+                    <div class="visual-plate-container relative w-72 h-72 rounded-full overflow-hidden shadow-2xl border-4 border-slate-100 dark:border-slate-700">
+                        <!-- Komposisi Gambar Makanan Asli 4 Kuadran/Sektor -->
+                        <div class="plate-sector sector-carb" title="1/3 Makanan Pokok">
+                            <span class="sector-label">🍚 1/3 Karbohidrat</span>
+                        </div>
+                        <div class="plate-sector sector-veg" title="1/3 Sayuran">
+                            <span class="sector-label">🥦 1/3 Sayuran</span>
+                        </div>
+                        <div class="plate-sector sector-prot" title="1/6 Protein">
+                            <span class="sector-label">🍗 1/6 Protein</span>
+                        </div>
+                        <div class="plate-sector sector-fruit" title="1/6 Buah-buahan">
+                            <span class="sector-label">🍌 1/6 Buah</span>
+                        </div>
+                        <div class="plate-center-badge">
+                            <i class="fa-solid fa-utensils text-emerald-600"></i>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 mt-5 text-[11px] font-bold w-full max-w-xs">
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Makanan Pokok (1/3)</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Sayur-Mayur (1/3)</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500 inline-block"></span> Lauk Hewani/Nabati (1/6)</div>
-                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span> Buah Segar (1/6)</div>
+                    <div class="grid grid-cols-2 gap-3 mt-4 text-[11px] font-bold w-full max-w-xs">
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span> 1/3 Makanan Pokok</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> 1/3 Sayur-Mayur</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500"></span> 1/6 Lauk Protein</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span> 1/6 Buah Segar</div>
                     </div>
                 </div>
 
+                <!-- Rekomendasi Takaran Gram & Menu Sesuai Siklus -->
                 <div class="lg:col-span-6 space-y-4">
-                    <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
-                        <span class="text-xs font-extrabold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block" id="cycle-target-title">Target Gizi: Balita (&lt;5 Tahun)</span>
-                        <h4 class="text-base font-black text-slate-900 dark:text-white mt-1" id="cycle-target-cal">Estimasi: 350 - 450 Kkal / Kali Makan</h4>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1" id="cycle-target-desc">Prioritas asam amino esensial tinggi untuk pencegahan stunting dan perkembangan jaringan otak.</p>
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                        <span class="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block" id="cycle-target-title">Target Gizi</span>
+                        <h4 class="text-base font-black text-slate-900 dark:text-white mt-1" id="cycle-target-cal">Estimasi Kalori</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed" id="cycle-target-desc">Deskripsi gizi.</p>
                     </div>
 
                     <div class="space-y-2 text-xs">
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex justify-between items-center">
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 flex justify-between items-center">
                             <span class="font-bold">🍚 1/3 Makanan Pokok:</span>
-                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-carb">Nasi lembek / ubi lumat (100 - 150 gr)</span>
+                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-carb">-</span>
                         </div>
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex justify-between items-center">
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 flex justify-between items-center">
                             <span class="font-bold">🥦 1/3 Sayuran:</span>
-                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-veg">Bayam, wortel cincang, labu siam (100 gr)</span>
+                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-veg">-</span>
                         </div>
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex justify-between items-center">
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 flex justify-between items-center">
                             <span class="font-bold">🍗 1/6 Lauk Protein:</span>
-                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-prot">Ikan kembung, telur rebus, tempe (50 gr)</span>
+                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-prot">-</span>
                         </div>
-                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 flex justify-between items-center">
+                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 flex justify-between items-center">
                             <span class="font-bold">🍌 1/6 Buah-buahan:</span>
-                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-fruit">Pepaya manis / pisang kepok (50 gr)</span>
+                            <span class="text-slate-600 dark:text-slate-300 text-right" id="cycle-fruit">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Rekomendasi Resep Khusus Siklus Ini -->
+                    <div class="pt-2">
+                        <h5 class="font-bold text-xs text-slate-800 dark:text-slate-200 mb-2">Rekomendasi Resep Khusus Siklus Ini:</h5>
+                        <div id="cycle-recipe-recommendation" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <!-- Disuntikkan JS -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Pengingat Perilaku Sehat -->
+            <!-- Pengingat Perilaku Sehat & Dropdown Aktivitas Fisik -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <!-- Hidrasi Air Putih -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
@@ -315,29 +408,37 @@
                     </div>
                 </div>
 
-                <!-- Aktivitas Fisik -->
+                <!-- Aktivitas Fisik dengan Dropdown Pilihan Aktivitas -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <h4 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                                 <i class="fa-solid fa-person-walking text-emerald-500"></i> Aktivitas Fisik Harian
                             </h4>
-                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">30 Menit Target</span>
+                            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400" id="activity-badge-count">0 Selesai</span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Jalan santai, senam ringan, atau bersepeda bersama anak.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Pilih aktivitas yang sudah Anda atau keluarga selesaikan hari ini.</p>
                         
-                        <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-xs space-y-1">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="chk-act-1" class="rounded text-emerald-600">
-                                <span>Peregangan 10 menit pagi hari</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" id="chk-act-2" class="rounded text-emerald-600">
-                                <span>Jalan santai 20 menit sore</span>
-                            </label>
+                        <!-- Dropdown Aktivitas -->
+                        <div class="space-y-2">
+                            <select id="activity-dropdown" class="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-semibold">
+                                <option value="Jalan Santai 20 Menit">🚶 Jalan Santai 20 Menit (Bersama Lansia/Anak)</option>
+                                <option value="Senam Pagi Ringan 15 Menit">🤸 Senam Pagi Ringan 15 Menit</option>
+                                <option value="Bermain Aktif Bersama Balita 30 Menit">⚽ Bermain Aktif Bersama Balita 30 Menit</option>
+                                <option value="Berkebun Sayur di Pekarangan">🌿 Berkebun Sayur di Pekarangan Rumah</option>
+                                <option value="Bersepeda Santai Keliling Komplek">🚴 Bersepeda Santai Keliling Lingkungan</option>
+                                <option value="Peregangan Sendi & Otot 10 Menit">🧘 Peregangan Sendi & Otot</option>
+                            </select>
+                            <button onclick="logDropdownActivity()" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition">
+                                <i class="fa-solid fa-check mr-1"></i> Catat Aktivitas Ini
+                            </button>
+                        </div>
+
+                        <!-- Daftar Log Aktivitas Hari Ini -->
+                        <div id="activity-logs-container" class="mt-3 space-y-1.5 max-h-24 overflow-y-auto text-[11px] text-slate-600 dark:text-slate-300">
+                            <!-- Disuntikkan JS -->
                         </div>
                     </div>
-                    <button onclick="logActivity()" class="mt-3 w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold">Catat Aktivitas Hari Ini</button>
                 </div>
 
                 <!-- Cuci Tangan CTPS -->
@@ -421,11 +522,11 @@
             </div>
         </section>
 
-        <!-- ================= PAGE 4: DAPUR RESEP INKLUSIF (15 RESEP) ================= -->
+        <!-- ================= PAGE 4: DAPUR RESEP INKLUSIF ================= -->
         <section id="page-resep" class="hidden space-y-6">
             <div class="text-center max-w-2xl mx-auto space-y-2">
                 <h2 class="text-2xl font-black text-slate-900 dark:text-white">Dapur Resep Pangan Nusantara (15 Menu)</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Tersedia masing-masing 5 resep teruji untuk Stunting, Hipertensi, dan Diabetes.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Menu teruji khusus Stunting, Hipertensi, dan Diabetes yang otomatis terhubung ke riwayat keluarga.</p>
             </div>
 
             <!-- Filter Pencarian & Kategori Medis -->
@@ -433,7 +534,7 @@
                 <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
-                        <input type="text" id="recipe-search" oninput="filterRecipes()" placeholder="Cari resep atau bahan lokal..." class="w-full pl-9 pr-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
+                        <input type="text" id="recipe-search" oninput="filterRecipes()" placeholder="Cari resep atau bahan pangan lokal..." class="w-full pl-9 pr-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
                     </div>
                     <select id="recipe-med-filter" onchange="filterRecipes()" class="px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none font-semibold">
                         <option value="all">Semua Kategori Medis (15)</option>
@@ -453,13 +554,56 @@
         <!-- ================= PAGE 5: PUSAT EDUKASI & GAMIFIKASI ================= -->
         <section id="page-edukasi" class="hidden space-y-6">
             <div class="text-center max-w-2xl mx-auto space-y-2">
-                <h2 class="text-2xl font-black text-slate-900 dark:text-white">Gamifikasi GO, SLOW, WHOA</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Latih kebiasaan memilih pangan bernutrisi seimbang bersama seluruh anggota keluarga.</p>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white">Pusat Edukasi & Gamifikasi Pangan Cerdas</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Pahami konsep rambu gizi GO, SLOW, WHOA dan uji kemampuan Anda dalam kuis bervariasi.</p>
             </div>
 
+            <!-- Bagian Edukasi Penjelasan Konsep GO, SLOW, WHOA -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="p-5 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-2">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 text-white font-extrabold text-[11px]">
+                        🟢 KATEGORI "GO" (Hijau)
+                    </div>
+                    <h4 class="font-black text-base text-emerald-900 dark:text-emerald-200">Santap Bebas Setiap Hari</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Pangan padat gizi, minim proses olahan, rendah lemak jenuh, dan tanpa tambahan gula/garam berlebih. Sangat baik untuk daya tahan tubuh dan pertumbuhan sel otak.
+                    </p>
+                    <span class="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 block pt-1">
+                        Contoh: Sayur bayam rebus, ikan bakar kunyit, telur rebus, buah segar, air putih.
+                    </span>
+                </div>
+
+                <div class="p-5 rounded-3xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 space-y-2">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500 text-white font-extrabold text-[11px]">
+                        🟡 KATEGORI "SLOW" (Kuning)
+                    </div>
+                    <h4 class="font-black text-base text-amber-900 dark:text-amber-200">Makan Terencana & Terukur</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Makanan yang masih bernutrisi namun memiliki tambahan sedikit gula, garam, atau lemak dalam proses pembuatannya. Dianjurkan dibatasi porsinya setiap kali makan.
+                    </p>
+                    <span class="text-[11px] font-bold text-amber-700 dark:text-amber-400 block pt-1">
+                        Contoh: Nasi putih pulen, roti gandum oles selai tipis, sayur santan encer, kue kukus tradisional.
+                    </span>
+                </div>
+
+                <div class="p-5 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 space-y-2">
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-600 text-white font-extrabold text-[11px]">
+                        🔴 KATEGORI "WHOA" (Merah)
+                    </div>
+                    <h4 class="font-black text-base text-rose-900 dark:text-rose-200">Peringatan: Sesekali Saja!</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Pangan ultra-proses tinggi gula pasir, lemak jenuh/trans, dan natrium tinggi. Membawa risiko lonjakan gula darah, obesitas, dan hipertensi jika sering dikonsumsi.
+                    </p>
+                    <span class="text-[11px] font-bold text-rose-700 dark:text-rose-400 block pt-1">
+                        Contoh: Gorengan bertepung renyah, minuman sirup/boba manis, keripik kemasan asin, sosis instan.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Mini Game Interaktif dengan Pilihan Lebih Bervariasi -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-2xl mx-auto space-y-5 text-center">
                 <div class="flex justify-between items-center text-xs font-bold">
-                    <span class="text-slate-400">Ronde <span id="game-round">1</span> / 5</span>
+                    <span class="text-slate-400">Ronde <span id="game-round">1</span> / <span id="game-total-rounds">8</span></span>
                     <span class="text-emerald-600 dark:text-emerald-400">Skor: <span id="game-score">0</span> XP</span>
                 </div>
 
@@ -469,14 +613,14 @@
                     <p id="game-food-desc" class="text-xs text-slate-500 dark:text-slate-400">Sayuran hijau rebus segar tanpa santan minyak.</p>
                 </div>
 
-                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300">Pilih kategori lampu rambu yang tepat:</p>
+                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300">Tentukan kategori lampu rambu gizi makanan di atas:</p>
 
                 <div class="grid grid-cols-3 gap-3">
                     <button onclick="submitGameAnswer('GO')" class="py-3 px-2 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 hover:bg-emerald-500 hover:text-white text-emerald-800 dark:text-emerald-300 font-extrabold text-xs transition border border-emerald-300 dark:border-emerald-800">
                         🟢 GO<br><span class="text-[10px] font-normal">Santap Bebas</span>
                     </button>
                     <button onclick="submitGameAnswer('SLOW')" class="py-3 px-2 rounded-2xl bg-amber-100 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-white text-amber-800 dark:text-amber-300 font-extrabold text-xs transition border border-amber-300 dark:border-amber-800">
-                        🟡 SLOW<br><span class="text-[10px] font-normal">Makan Terencana</span>
+                        🟡 SLOW<br><span class="text-[10px] font-normal">Terencana</span>
                     </button>
                     <button onclick="submitGameAnswer('WHOA')" class="py-3 px-2 rounded-2xl bg-rose-100 dark:bg-rose-950/60 hover:bg-rose-500 hover:text-white text-rose-800 dark:text-rose-300 font-extrabold text-xs transition border border-rose-300 dark:border-rose-800">
                         🔴 WHOA<br><span class="text-[10px] font-normal">Sangat Jarang</span>
@@ -485,24 +629,26 @@
             </div>
         </section>
 
-        <!-- ================= PAGE 6: LAYANAN & PETA (DENGAN FORUM INTERAKTIF) ================= -->
+        <!-- ================= PAGE 6: LAYANAN & PETA ================= -->
         <section id="page-komunitas" class="hidden space-y-6">
             <div class="text-center max-w-2xl mx-auto space-y-2">
                 <h2 class="text-2xl font-black text-slate-900 dark:text-white">Peta Layanan Pangan & Ruang Berbagi</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Temukan titik pangan bersubsidi dan berdiskusi langsung dengan warga sekitar.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Titik lokasi rumah Anda otomatis terpetakan bersama pasar murah, kebun gizi, dan posko kesehatan.</p>
             </div>
 
-            <!-- Peta Interaktif Leaflet dengan Filter Aktif Jelas -->
+            <!-- Peta Leaflet dengan Point Rumah & Filter Aktif Jelas -->
             <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <div class="flex flex-wrap justify-between items-center gap-2">
                     <h3 class="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-map-location-dot text-emerald-600"></i> Sebaran Titik Pangan & Posko
+                        <i class="fa-solid fa-map-location-dot text-emerald-600"></i> Sebaran Titik Pangan & Rumah Anda
                     </h3>
                     
-                    <!-- Tombol Filter Peta yang Indikator Aktifnya Sangat Terlihat -->
                     <div class="flex gap-1.5 text-xs bg-slate-100 dark:bg-slate-900/80 p-1 rounded-xl">
                         <button onclick="filterMap('all')" id="btn-map-all" class="map-filter-btn px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold shadow-xs transition">
-                            Semua Titik (5)
+                            Semua Titik
+                        </button>
+                        <button onclick="filterMap('home')" id="btn-map-home" class="map-filter-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 font-medium hover:bg-white dark:hover:bg-slate-800 transition">
+                            🏠 Rumah Anda
                         </button>
                         <button onclick="filterMap('pasar')" id="btn-map-pasar" class="map-filter-btn px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 font-medium hover:bg-white dark:hover:bg-slate-800 transition">
                             🛒 Pasar Murah
@@ -519,7 +665,7 @@
                 <div id="map" class="w-full h-80 rounded-2xl border border-slate-200 dark:border-slate-700 z-10 shadow-inner"></div>
             </div>
 
-            <!-- Ruang Berbagi Warga & Fitur Tanggapi Komentar Aktif -->
+            <!-- Ruang Berbagi Warga dengan Komentar Tanggapi Aktif -->
             <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                 <div class="flex justify-between items-center">
                     <div>
@@ -528,18 +674,16 @@
                     </div>
                 </div>
 
-                <!-- Input Tambah Kiriman -->
                 <form onsubmit="addForumPost(event)" class="space-y-2">
                     <textarea id="forum-content" rows="2" placeholder="Tulis kabar pangan, lokasi pasar murah, atau tips memasak hemat..." required class="w-full p-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
                     <div class="flex justify-between items-center">
-                        <input type="text" id="forum-author" placeholder="Nama Anda (cth: Ibu Rahma RW 04)" required class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none w-52">
+                        <input type="text" id="forum-author" placeholder="Nama Anda..." class="px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none w-52">
                         <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
                             <i class="fa-solid fa-paper-plane"></i> Kirim Kabar
                         </button>
                     </div>
                 </form>
 
-                <!-- Daftar Diskusi dengan Kolom Tanggapan Aktif -->
                 <div id="forum-posts-container" class="space-y-3 pt-2">
                     <!-- Disuntikkan via JS -->
                 </div>
@@ -549,7 +693,7 @@
     </main>
 
     <!-- ============================================== -->
-    <!-- 3. FOOTER RESMI                                -->
+    <!-- 3. FOOTER RESMI (DIBUAT OLEH TIM ABULA)        -->
     <!-- ============================================== -->
     <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 text-xs text-slate-500 transition-colors mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -558,10 +702,12 @@
                 <span class="font-bold text-slate-700 dark:text-slate-300">PanganKeluarga &copy; 2026</span>
                 <span>• Gerakan Gotong Royong Gizi & Pangan Sehat Lintas Generasi</span>
             </div>
-            <div class="flex space-x-4 font-semibold">
-                <span class="text-emerald-600 dark:text-emerald-400">Standar Kemenkes RI</span>
+            <div class="flex items-center space-x-3 font-semibold">
+                <span class="text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-slate-800 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
+                    dibuat oleh tim Abula
+                </span>
+                <span>Kemenkes RI</span>
                 <span>BAPANAS</span>
-                <span>WCAG 2.2 Aksesibilitas</span>
             </div>
         </div>
     </footer>
@@ -576,23 +722,27 @@
                     <i class="fa-solid fa-users"></i>
                 </div>
                 <h3 class="text-base font-bold text-slate-900 dark:text-white">Ubah Nama Profil Keluarga</h3>
-                <p class="text-xs text-slate-400">Nama ini akan tampil di navbar, beranda, dan laporan gizi.</p>
+                <p class="text-xs text-slate-400">Perbarui nama keluarga & kepala keluarga.</p>
             </div>
-            <form onsubmit="saveFamilyName(event)" class="space-y-3 text-xs">
+            <form onsubmit="saveFamilyProfile(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Nama Keluarga:</label>
-                    <input type="text" id="input-family-name" required placeholder="cth: Keluarga Ibu Sari / Keluarga Pak Budi" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+                    <input type="text" id="input-family-name" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Kepala Keluarga:</label>
+                    <input type="text" id="input-head-name" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeEditFamilyModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold">Batal</button>
-                    <button type="submit" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-sm">Simpan Nama</button>
+                    <button type="submit" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-sm">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- ============================================== -->
-    <!-- 5. MODAL: TAMBAH ANGGOTA (DENGAN TGL LAHIR)    -->
+    <!-- 5. MODAL: TAMBAH ANGGOTA KELUARGA              -->
     <!-- ============================================== -->
     <div id="member-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-200 dark:border-slate-700">
@@ -600,19 +750,24 @@
             <form onsubmit="saveNewFamilyMember(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-semibold mb-1">Nama Lengkap:</label>
-                    <input type="text" id="new-member-name" required placeholder="cth: Arka / Nenek Aminah / Rian" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
+                    <input type="text" id="new-member-name" required placeholder="cth: Arka / Nenek Aminah" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold mb-1">Tanggal Lahir (Otomatis Menghitung Umur & Kategori):</label>
+                    <label class="block font-semibold mb-1">Tanggal Lahir (Menentukan Umur & Kategori Otomatis):</label>
                     <input type="date" id="new-member-dob" required class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block font-semibold mb-1">Catatan Kebutuhan Gizi / Alergi:</label>
-                    <input type="text" id="new-member-note" placeholder="cth: Pantau zat besi, rendah garam hipertensi" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
+                    <label class="block font-semibold mb-1">Kondisi Penyakit / Kebutuhan Nutrisi Khusus:</label>
+                    <select id="new-member-disease" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 focus:outline-none">
+                        <option value="none">Sehat / Tanpa Riwayat Khusus</option>
+                        <option value="stunting">Risiko Stunting / Butuh Tambahan Protein</option>
+                        <option value="hipertensi">Hipertensi (Harus Rendah Garam)</option>
+                        <option value="diabetes">Diabetes (Indeks Glikemik Rendah)</option>
+                    </select>
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeAddMemberModal()" class="flex-1 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold">Batal</button>
-                    <button type="submit" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold">Simpan Anggota</button>
+                    <button type="submit" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold">Simpan</button>
                 </div>
             </form>
         </div>
@@ -658,9 +813,7 @@
         </div>
     </div>
 
-    <!-- ============================================== -->
-    <!-- 7. SCRIPT LOGIKA APLIKASI (JAVASCRIPT)         -->
-    <!-- ============================================== -->
+    <!-- Script Logika Terpisah -->
     <script src="app.js"></script>
 </body>
 </html>
