@@ -1,13 +1,221 @@
 /**
- * PanganKeluarga - Logika Aplikasi Lengkap
+ * PanganKeluarga - Versi 1.1
  * Dikembangkan oleh Tim Abula (2026)
  */
 
 /* ==============================================================
-   1. DATA MASTER 15 RESEP LENGKAP (5 STUNTING, 5 HIPERTENSI, 5 DIABETES)
+   1. DATA MASTER WILAYAH SE-INDONESIA (PROVINSI -> KOTA -> KECAMATAN)
+   ============================================================== */
+const INDONESIA_REGIONS = [
+    {
+        province: "DKI Jakarta",
+        cities: [
+            {
+                name: "Jakarta Selatan",
+                lat: -6.2615, lng: 106.8106,
+                districts: [
+                    { name: "Kebayoran Baru", lat: -6.2444, lng: 106.7997 },
+                    { name: "Tebet", lat: -6.2289, lng: 106.8575 },
+                    { name: "Cilandak", lat: -6.2922, lng: 106.7972 },
+                    { name: "Pasar Minggu", lat: -6.2891, lng: 106.8415 }
+                ]
+            },
+            {
+                name: "Jakarta Pusat",
+                lat: -6.1805, lng: 106.8284,
+                districts: [
+                    { name: "Gambir", lat: -6.1754, lng: 106.8272 },
+                    { name: "Menteng", lat: -6.1963, lng: 106.8335 },
+                    { name: "Tanah Abang", lat: -6.1944, lng: 106.8145 }
+                ]
+            },
+            {
+                name: "Jakarta Timur",
+                lat: -6.2250, lng: 106.9004,
+                districts: [
+                    { name: "Kramat Jati", lat: -6.2755, lng: 106.8689 },
+                    { name: "Jatinegara", lat: -6.2301, lng: 106.8722 },
+                    { name: "Duren Sawit", lat: -6.2343, lng: 106.9152 }
+                ]
+            },
+            {
+                name: "Jakarta Barat",
+                lat: -6.1683, lng: 106.7589,
+                districts: [
+                    { name: "Kebon Jeruk", lat: -6.1915, lng: 106.7725 },
+                    { name: "Grogol Petamburan", lat: -6.1622, lng: 106.7915 }
+                ]
+            },
+            {
+                name: "Jakarta Utara",
+                lat: -6.1384, lng: 106.8640,
+                districts: [
+                    { name: "Kelapa Gading", lat: -6.1583, lng: 106.9083 },
+                    { name: "Tanjung Priok", lat: -6.1264, lng: 106.8833 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "Jawa Barat",
+        cities: [
+            {
+                name: "Kota Bandung",
+                lat: -6.9175, lng: 107.6191,
+                districts: [
+                    { name: "Coblong", lat: -6.8872, lng: 107.6156 },
+                    { name: "Sukajadi", lat: -6.8892, lng: 107.5925 },
+                    { name: "Cicendo", lat: -6.9069, lng: 107.5922 },
+                    { name: "Lengkong", lat: -6.9317, lng: 107.6256 }
+                ]
+            },
+            {
+                name: "Kota Bogor",
+                lat: -6.5971, lng: 106.8060,
+                districts: [
+                    { name: "Bogor Tengah", lat: -6.5950, lng: 106.7972 },
+                    { name: "Bogor Selatan", lat: -6.6342, lng: 106.8089 },
+                    { name: "Bogor Timur", lat: -6.6083, lng: 106.8222 }
+                ]
+            },
+            {
+                name: "Kota Depok",
+                lat: -6.4025, lng: 106.7942,
+                districts: [
+                    { name: "Pancoran Mas", lat: -6.3986, lng: 106.8122 },
+                    { name: "Beji", lat: -6.3711, lng: 106.8228 },
+                    { name: "Sukmajaya", lat: -6.4011, lng: 106.8389 }
+                ]
+            },
+            {
+                name: "Kota Bekasi",
+                lat: -6.2383, lng: 106.9756,
+                districts: [
+                    { name: "Bekasi Selatan", lat: -6.2625, lng: 106.9856 },
+                    { name: "Bekasi Timur", lat: -6.2489, lng: 107.0122 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "Jawa Tengah",
+        cities: [
+            {
+                name: "Kota Semarang",
+                lat: -6.9667, lng: 110.4167,
+                districts: [
+                    { name: "Semarang Tengah", lat: -6.9819, lng: 110.4219 },
+                    { name: "Semarang Selatan", lat: -7.0019, lng: 110.4189 },
+                    { name: "Banyumanik", lat: -7.0672, lng: 110.4206 }
+                ]
+            },
+            {
+                name: "Kota Surakarta (Solo)",
+                lat: -7.5755, lng: 110.8243,
+                districts: [
+                    { name: "Banjarsari", lat: -7.5519, lng: 110.8206 },
+                    { name: "Laweyan", lat: -7.5683, lng: 110.7989 },
+                    { name: "Jebres", lat: -7.5622, lng: 110.8519 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "DI Yogyakarta",
+        cities: [
+            {
+                name: "Kota Yogyakarta",
+                lat: -7.7956, lng: 110.3695,
+                districts: [
+                    { name: "Danurejan", lat: -7.7925, lng: 110.3725 },
+                    { name: "Gondomanan", lat: -7.8019, lng: 110.3689 },
+                    { name: "Kraton", lat: -7.8089, lng: 110.3622 },
+                    { name: "Umbulharjo", lat: -7.8189, lng: 110.3889 }
+                ]
+            },
+            {
+                name: "Kabupaten Sleman",
+                lat: -7.7156, lng: 110.3556,
+                districts: [
+                    { name: "Depok", lat: -7.7719, lng: 110.4056 },
+                    { name: "Mlati", lat: -7.7419, lng: 110.3519 },
+                    { name: "Ngaglik", lat: -7.7189, lng: 110.3889 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "Jawa Timur",
+        cities: [
+            {
+                name: "Kota Surabaya",
+                lat: -7.2575, lng: 112.7521,
+                districts: [
+                    { name: "Tegalsari", lat: -7.2719, lng: 112.7389 },
+                    { name: "Gubeng", lat: -7.2789, lng: 112.7589 },
+                    { name: "Wonokromo", lat: -7.3019, lng: 112.7389 },
+                    { name: "Genteng", lat: -7.2619, lng: 112.7489 }
+                ]
+            },
+            {
+                name: "Kota Malang",
+                lat: -7.9666, lng: 112.6326,
+                districts: [
+                    { name: "Klojen", lat: -7.9789, lng: 112.6319 },
+                    { name: "Lowokwaru", lat: -7.9419, lng: 112.6189 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "Bali",
+        cities: [
+            {
+                name: "Kota Denpasar",
+                lat: -8.6705, lng: 115.2126,
+                districts: [
+                    { name: "Denpasar Selatan", lat: -8.6989, lng: 115.2289 },
+                    { name: "Denpasar Barat", lat: -8.6656, lng: 115.1989 },
+                    { name: "Denpasar Timur", lat: -8.6489, lng: 115.2419 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "Sumatera Utara",
+        cities: [
+            {
+                name: "Kota Medan",
+                lat: 3.5952, lng: 98.6722,
+                districts: [
+                    { name: "Medan Kota", lat: 3.5819, lng: 98.6889 },
+                    { name: "Medan Baru", lat: 3.5719, lng: 98.6589 },
+                    { name: "Medan Barat", lat: 3.6019, lng: 98.6719 }
+                ]
+            }
+        ]
+    },
+    {
+        province: "Sulawesi Selatan",
+        cities: [
+            {
+                name: "Kota Makassar",
+                lat: -5.1477, lng: 119.4327,
+                districts: [
+                    { name: "Ujung Pandang", lat: -5.1389, lng: 119.4089 },
+                    { name: "Panakkukang", lat: -5.1489, lng: 119.4489 },
+                    { name: "Rappocini", lat: -5.1689, lng: 119.4389 }
+                ]
+            }
+        ]
+    }
+];
+
+/* ==============================================================
+   2. DATA MASTER 15 RESEP LENGKAP
    ============================================================== */
 const RECIPES_15 = [
-    // 5 RESEP KHUSUS STUNTING / RISIKO GIZI KURANG
+    // 5 RESEP STUNTING
     {
         id: 1,
         title: "Sup Bening Ikan Kembung & Daun Kelor",
@@ -20,7 +228,7 @@ const RECIPES_15 = [
             "Didihkan 600 ml air bersama jahe geprek, serai, dan daun salam.",
             "Masukkan ikan kembung segar, masak dengan api sedang selama 10 menit.",
             "Tambahkan potongan wortel dan labu siam hingga lunak.",
-            "Matikan api, masukkan daun kelor segar, aduk rata dan sajikan selagi hangat."
+            "Matikan api, masukkan daun kelor segar, aduk rata dan sajikan hangat."
         ]
     },
     {
@@ -84,7 +292,7 @@ const RECIPES_15 = [
         ]
     },
 
-    // 5 RESEP KHUSUS HIPERTENSI (RENDAH GARAM)
+    // 5 RESEP HIPERTENSI
     {
         id: 6,
         title: "Orak-Arik Tempe & Labu Siam Rendah Garam",
@@ -161,7 +369,7 @@ const RECIPES_15 = [
         ]
     },
 
-    // 5 RESEP KHUSUS DIABETES (INDEKS GLIKEMIK RENDAH)
+    // 5 RESEP DIABETES
     {
         id: 11,
         title: "Nasi Merah Ubi Ungu Kukus & Teri Sangrai",
@@ -240,7 +448,7 @@ const RECIPES_15 = [
 ];
 
 /* ==============================================================
-   2. PANDUAN GIZI 5 SIKLUS HIDUP
+   3. DATA PANDUAN GIZI 5 SIKLUS HIDUP
    ============================================================== */
 const LIFE_CYCLE_DATA = {
     balita: {
@@ -291,7 +499,7 @@ const LIFE_CYCLE_DATA = {
 };
 
 /* ==============================================================
-   3. DATA PERMAINAN EDUKASI GO, SLOW, WHOA (8 BAHAN VARIATIF)
+   4. DATA GAME GO, SLOW, WHOA
    ============================================================== */
 const GAME_FOODS = [
     { icon: "🥬", name: "Sayur Bayam Bening", desc: "Sayuran hijau segar tanpa santan minyak.", answer: "GO" },
@@ -305,30 +513,17 @@ const GAME_FOODS = [
 ];
 
 /* ==============================================================
-   4. TITIK PETA LOKASI TERMASUK PILIHAN RUMAH
-   ============================================================== */
-const HOME_COORDINATES = {
-    loc1: { name: "Rumah Anda (Jl. Mawar No. 12)", lat: -6.2395, lng: 106.7910, desc: "Wilayah RW 03, dekat kebun gizi komunitas." },
-    loc2: { name: "Rumah Anda (Jl. Merdeka Selatan Blok B)", lat: -6.2420, lng: 106.7895, desc: "Wilayah RW 04, akses mudah ke pasar tradisional." },
-    loc3: { name: "Rumah Anda (Kompleks Harapan Sehat)", lat: -6.2460, lng: 106.7925, desc: "Wilayah RW 05, dekat posko penimbangan gizi terpadu." }
-};
-
-const PUBLIC_LOCATIONS = [
-    { name: "Pasar Tradisional Merdeka", type: "pasar", lat: -6.2415, lng: 106.7905, desc: "Pasar grosir komoditas pokok pangan segar bersubsidi." },
-    { name: "Gerai Beras Murah Mandiri BAPANAS", type: "pasar", lat: -6.2450, lng: 106.7950, desc: "Distribusi beras SPHP Rp 54.000/5kg dan Minyakita." },
-    { name: "Kebun Gizi Hidroponik Komunitas RW 03", type: "kebun", lat: -6.2390, lng: 106.7920, desc: "Petik bayam & kelor mandiri gratis untuk keluarga balita." },
-    { name: "Kebun Sayur Pekarangan Berseri RW 05", type: "kebun", lat: -6.2435, lng: 106.7860, desc: "Sentra tanaman cabai, terong, dan kangkung pekarangan." },
-    { name: "Posko Penimbangan & Gizi Terpadu Melati", type: "posko", lat: -6.2470, lng: 106.7890, desc: "Layanan konsultasi gizi balita & lansia gratis setiap hari kerja." }
-];
-
-/* ==============================================================
-   5. STATE UTAMA & LOCALSTORAGE
+   5. STATE UTAMA APLIKASI
    ============================================================== */
 let APP_DATA = {
     familyName: localStorage.getItem('pangan_family_name') || "",
     headName: localStorage.getItem('pangan_head_name') || "",
-    homeLocKey: localStorage.getItem('pangan_home_loc') || "loc1",
-    familyMembers: JSON.parse(localStorage.getItem('pangan_members_v2')) || [],
+    province: localStorage.getItem('pangan_province') || "",
+    city: localStorage.getItem('pangan_city') || "",
+    district: localStorage.getItem('pangan_district') || "",
+    address: localStorage.getItem('pangan_address') || "",
+    districtCoords: JSON.parse(localStorage.getItem('pangan_district_coords')) || null,
+    familyMembers: JSON.parse(localStorage.getItem('pangan_members_v11')) || [],
     waterGlasses: parseInt(localStorage.getItem('pangan_water')) || 6,
     activityLogs: JSON.parse(localStorage.getItem('pangan_activities')) || [],
     shoppingItems: JSON.parse(localStorage.getItem('pangan_shopping')) || [
@@ -337,27 +532,90 @@ let APP_DATA = {
         { id: 3, name: "Bayam Hijau Segar (2 ikat)", price: 6000, category: "sayur", checked: true },
         { id: 4, name: "Beras SPHP Bulog (5 kg)", price: 65000, category: "karbo", checked: false }
     ],
-    forumPosts: JSON.parse(localStorage.getItem('pangan_forum_v2')) || [
+    forumPosts: JSON.parse(localStorage.getItem('pangan_forum_v11')) || [
         {
             id: 1,
-            author: "Bu Rini (Kader RW 04)",
+            author: "Bu Rini (Kader PKK)",
             time: "Hari ini, 08.15 WIB",
             text: "Ibu-ibu sekalian, di Balai RW sedang ada bibit cabai rawit & terong polybag gratis dari Puskesmas. Monggo diambil untuk pekarangan!",
             likes: 14,
             comments: [
-                { author: "Kader Melati", text: "Siap Bu Rini, sangat bermanfaat untuk ketahanan dapur warga!", time: "08.40 WIB" }
+                { author: "Kader Melati", text: "Siap Bu Rini, sangat bermanfaat untuk ketahanan dapur keluarga!", time: "08.40 WIB" }
             ]
         }
     ]
 };
 
 /* ==============================================================
-   6. ONBOARDING & PRELOADER 3 DETIK PERSONAL
+   6. ONBOARDING & POPULASI WILAYAH (PROVINSI -> KOTA -> KECAMATAN)
    ============================================================== */
+function populateProvinceDropdown() {
+    const provSelect = document.getElementById('onboard-provinsi');
+    provSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+    INDONESIA_REGIONS.forEach((reg, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = reg.province;
+        provSelect.appendChild(opt);
+    });
+}
+
+function handleProvinceChange() {
+    const provSelect = document.getElementById('onboard-provinsi');
+    const citySelect = document.getElementById('onboard-kota');
+    const distSelect = document.getElementById('onboard-kecamatan');
+
+    citySelect.innerHTML = '<option value="">-- Pilih Kota / Kabupaten --</option>';
+    distSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+
+    const provIdx = provSelect.value;
+    if (provIdx === "") return;
+
+    const region = INDONESIA_REGIONS[provIdx];
+    region.cities.forEach((c, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = c.name;
+        citySelect.appendChild(opt);
+    });
+}
+
+function handleCityChange() {
+    const provSelect = document.getElementById('onboard-provinsi');
+    const citySelect = document.getElementById('onboard-kota');
+    const distSelect = document.getElementById('onboard-kecamatan');
+
+    distSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+
+    const provIdx = provSelect.value;
+    const cityIdx = citySelect.value;
+    if (provIdx === "" || cityIdx === "") return;
+
+    const city = INDONESIA_REGIONS[provIdx].cities[cityIdx];
+    if (city.districts && city.districts.length > 0) {
+        city.districts.forEach((d, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = d.name;
+            distSelect.appendChild(opt);
+        });
+    } else {
+        // Fallback default kecamatan jika tidak didefinisikan
+        const defaultDistricts = ["Pusat Kota", "Kecamatan Timur", "Kecamatan Barat", "Kecamatan Selatan"];
+        defaultDistricts.forEach((dName, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = dName;
+            distSelect.appendChild(opt);
+        });
+    }
+}
+
 function checkOnboarding() {
-    if (!APP_DATA.familyName || APP_DATA.familyMembers.length === 0) {
+    if (!APP_DATA.familyName || !APP_DATA.districtCoords || APP_DATA.familyMembers.length === 0) {
         document.getElementById('app-preloader').style.display = 'none';
         document.getElementById('onboarding-modal').classList.remove('hidden');
+        populateProvinceDropdown();
         renderOnboardInitialRows();
     } else {
         runPreloader(`Selamat datang ${APP_DATA.familyName} (${APP_DATA.headName})`);
@@ -367,7 +625,6 @@ function checkOnboarding() {
 function renderOnboardInitialRows() {
     const container = document.getElementById('onboard-members-list');
     container.innerHTML = '';
-    // Tambah 2 baris awal default
     addOnboardMemberRow("Ibu Sari", "1990-11-20", "none");
     addOnboardMemberRow("Arka", "2023-04-12", "stunting");
 }
@@ -376,9 +633,16 @@ function addOnboardMemberRow(name = '', dob = '', disease = 'none') {
     const container = document.getElementById('onboard-members-list');
     const row = document.createElement('div');
     row.className = 'onboard-member-row flex flex-wrap gap-2 items-center bg-slate-50 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700';
+    
+    // Set max date ke hari ini
+    const todayStr = new Date().toISOString().split('T')[0];
+
     row.innerHTML = `
         <input type="text" placeholder="Nama..." value="${name}" required class="mem-name flex-1 min-w-[120px] px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none">
-        <input type="date" value="${dob}" required class="mem-dob px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none">
+        <div class="flex flex-col">
+            <input type="date" value="${dob}" max="${todayStr}" required class="mem-dob px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none">
+            <span class="mem-dob-err text-rose-500 font-bold text-[10px] hidden">Data tidak sesuai.</span>
+        </div>
         <select class="mem-disease flex-1 min-w-[140px] px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none">
             <option value="none" ${disease === 'none' ? 'selected' : ''}>Sehat / Tanpa Riwayat</option>
             <option value="stunting" ${disease === 'stunting' ? 'selected' : ''}>Risiko Stunting / Gizi Balita</option>
@@ -390,40 +654,93 @@ function addOnboardMemberRow(name = '', dob = '', disease = 'none') {
     container.appendChild(row);
 }
 
+/* ==============================================================
+   7. VALIDASI TAHUN LAHIR ("Data tidak sesuai.")
+   ============================================================== */
+function validateBirthYear(dobString) {
+    if (!dobString) return false;
+    const currentYear = new Date().getFullYear();
+    const inputDate = new Date(dobString);
+    const birthYear = inputDate.getFullYear();
+
+    // Kebijakan: tahun lahir tidak boleh melebihi tahun sekarang (misal: 2027, 2029)
+    if (isNaN(birthYear) || birthYear > currentYear || inputDate > new Date()) {
+        return false;
+    }
+    return true;
+}
+
 function handleOnboardingSubmit(e) {
     e.preventDefault();
     const familyName = document.getElementById('onboard-family-name').value.trim();
     const headName = document.getElementById('onboard-head-name').value.trim();
-    const homeLocKey = document.getElementById('onboard-home-loc').value;
+    const provIdx = document.getElementById('onboard-provinsi').value;
+    const cityIdx = document.getElementById('onboard-kota').value;
+    const distIdx = document.getElementById('onboard-kecamatan').value;
+    const detailAddress = document.getElementById('onboard-detail-address').value.trim();
+
+    if (provIdx === "" || cityIdx === "" || distIdx === "") {
+        alert("Mohon pilih Provinsi, Kota/Kabupaten, dan Kecamatan tempat tinggal Anda.");
+        return;
+    }
+
+    const selectedRegion = INDONESIA_REGIONS[provIdx];
+    const selectedCity = selectedRegion.cities[cityIdx];
+    const selectedDistrict = (selectedCity.districts && selectedCity.districts[distIdx]) 
+        ? selectedCity.districts[distIdx] 
+        : { name: "Kecamatan Terpilih", lat: selectedCity.lat, lng: selectedCity.lng };
 
     const rows = document.querySelectorAll('.onboard-member-row');
     const members = [];
+    let hasDateError = false;
+
     rows.forEach((r, idx) => {
         const name = r.querySelector('.mem-name').value.trim();
         const dob = r.querySelector('.mem-dob').value;
         const disease = r.querySelector('.mem-disease').value;
-        if (name && dob) {
-            members.push({ id: Date.now() + idx, name, dob, disease });
+        const errSpan = r.querySelector('.mem-dob-err');
+
+        if (!validateBirthYear(dob)) {
+            hasDateError = true;
+            if (errSpan) errSpan.classList.remove('hidden');
+        } else {
+            if (errSpan) errSpan.classList.add('hidden');
+            if (name && dob) {
+                members.push({ id: Date.now() + idx, name, dob, disease });
+            }
         }
     });
 
+    if (hasDateError) {
+        alert("Data tidak sesuai. Tahun lahir tidak boleh melebihi tahun saat ini!");
+        return;
+    }
+
     if (members.length === 0) {
-        alert('Mohon masukkan minimal 1 anggota keluarga.');
+        alert("Mohon masukkan minimal 1 anggota keluarga yang valid.");
         return;
     }
 
     // Simpan ke State & LocalStorage
     APP_DATA.familyName = familyName;
     APP_DATA.headName = headName;
-    APP_DATA.homeLocKey = homeLocKey;
+    APP_DATA.province = selectedRegion.province;
+    APP_DATA.city = selectedCity.name;
+    APP_DATA.district = selectedDistrict.name;
+    APP_DATA.address = detailAddress;
+    APP_DATA.districtCoords = { lat: selectedDistrict.lat, lng: selectedDistrict.lng };
     APP_DATA.familyMembers = members;
 
     localStorage.setItem('pangan_family_name', familyName);
     localStorage.setItem('pangan_head_name', headName);
-    localStorage.setItem('pangan_home_loc', homeLocKey);
-    localStorage.setItem('pangan_members_v2', JSON.stringify(members));
+    localStorage.setItem('pangan_province', selectedRegion.province);
+    localStorage.setItem('pangan_city', selectedCity.name);
+    localStorage.setItem('pangan_district', selectedDistrict.name);
+    localStorage.setItem('pangan_address', detailAddress);
+    localStorage.setItem('pangan_district_coords', JSON.stringify(APP_DATA.districtCoords));
+    localStorage.setItem('pangan_members_v11', JSON.stringify(members));
 
-    // Tutup onboarding dan jalankan loading 3 detik
+    // Tutup onboarding dan aktifkan preloader 3 detik
     document.getElementById('onboarding-modal').classList.add('hidden');
     document.getElementById('app-preloader').style.display = 'flex';
     document.getElementById('app-preloader').classList.remove('opacity-0', 'pointer-events-none');
@@ -441,16 +758,16 @@ function runPreloader(welcomeMsg = "Selamat datang!") {
 
     welcomeEl.textContent = welcomeMsg;
 
-    const totalDuration = 3000; // Tepat 3 Detik
+    const totalDuration = 3000; // 3 Detik
     const intervalTime = 30;
     const totalSteps = totalDuration / intervalTime;
     let currentStep = 0;
 
     const stages = [
-        { limit: 25, text: "Menyiapkan modul gizi & data lokal..." },
-        { limit: 50, text: "Mendeteksi riwayat kesehatan keluarga..." },
-        { limit: 75, text: "Menghubungkan resep medis & titik lokasi rumah..." },
-        { limit: 100, text: "Sinkronisasi selesai!" }
+        { limit: 25, text: "Menyiapkan modul gizi keluarga..." },
+        { limit: 50, text: "Menghubungkan data lokasi tempat tinggal di Indonesia..." },
+        { limit: 75, text: "Sinkronisasi titik pasar Google Maps..." },
+        { limit: 100, text: "Selesai! Membuka Portal..." }
     ];
 
     const timer = setInterval(() => {
@@ -474,7 +791,48 @@ function runPreloader(welcomeMsg = "Selamat datang!") {
 }
 
 /* ==============================================================
-   7. DETEKSI UMUR & SIKLUS HIDUP OTOMATIS
+   8. TOMBOL KELUAR / RESET AKUN (DI TARO PADA MODAL UBAH PROFIL)
+   ============================================================== */
+function confirmLogoutAndReset() {
+    const konfirmasi = confirm(
+        "Apakah Anda yakin ingin keluar dan mereset profil keluarga serta tempat tinggal?\n\nSeluruh data pendaftaran akan dibersihkan dan Anda dapat mengisi ulang dari awal."
+    );
+
+    if (konfirmasi) {
+        // Bersihkan LocalStorage
+        localStorage.removeItem('pangan_family_name');
+        localStorage.removeItem('pangan_head_name');
+        localStorage.removeItem('pangan_province');
+        localStorage.removeItem('pangan_city');
+        localStorage.removeItem('pangan_district');
+        localStorage.removeItem('pangan_address');
+        localStorage.removeItem('pangan_district_coords');
+        localStorage.removeItem('pangan_members_v11');
+
+        // Reset State Objek
+        APP_DATA.familyName = "";
+        APP_DATA.headName = "";
+        APP_DATA.province = "";
+        APP_DATA.city = "";
+        APP_DATA.district = "";
+        APP_DATA.address = "";
+        APP_DATA.districtCoords = null;
+        APP_DATA.familyMembers = [];
+
+        // Hapus instance leaflet jika ada
+        if (leafletMap) {
+            leafletMap.remove();
+            leafletMap = null;
+            mapMarkers = [];
+        }
+
+        closeEditFamilyModal();
+        checkOnboarding();
+    }
+}
+
+/* ==============================================================
+   9. DETEKSI UMUR & SIKLUS HIDUP OTOMATIS
    ============================================================== */
 function calculateAgeAndCycle(dobString) {
     const birthDate = new Date(dobString);
@@ -518,9 +876,6 @@ function calculateAgeAndCycle(dobString) {
     return { years, months, ageText, cycle, label, badgeColor };
 }
 
-/* ==============================================================
-   8. SISTEM OTOMATIS HUBUNGAN PENYAKIT KE RESEP
-   ============================================================== */
 function renderDiseaseAlerts() {
     const container = document.getElementById('disease-alert-section');
     container.innerHTML = '';
@@ -539,8 +894,8 @@ function renderDiseaseAlerts() {
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
                     <div>
-                        <span class="font-bold text-emerald-900 dark:text-emerald-200">Seluruh Anggota Keluarga Bebas Riwayat Medis Kronis</span>
-                        <p class="text-slate-500 dark:text-slate-400 text-[11px]">Tetap terapkan Isi Piringku seimbang untuk menjaga kebugaran harian.</p>
+                        <span class="font-bold text-emerald-900 dark:text-emerald-200">Seluruh Anggota Keluarga Bebas Riwayat Medis Khusus</span>
+                        <p class="text-slate-500 dark:text-slate-400 text-[11px]">Tetap terapkan Isi Piringku seimbang untuk menjaga kebugaran keluarga.</p>
                     </div>
                 </div>
                 <button onclick="navigate('resep')" class="font-bold text-emerald-700 dark:text-emerald-400 hover:underline">Lihat Resep Sehat →</button>
@@ -594,9 +949,6 @@ function filterRecipesByDisease(category) {
     filterRecipes();
 }
 
-/* ==============================================================
-   9. RENDER ANGGOTA KELUARGA & HEADER
-   ============================================================== */
 function renderFamilyMembers() {
     const container = document.getElementById('family-members-list');
     container.innerHTML = '';
@@ -616,7 +968,7 @@ function renderFamilyMembers() {
         card.innerHTML = `
             <div>
                 <div class="flex justify-between items-start mb-1.5">
-                    <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${info.badgeColor}">
+                    <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full ${info.badgeColor}">
                         ${info.label} (${info.ageText})
                     </span>
                     <button onclick="removeFamilyMember(${m.id})" title="Hapus Anggota" class="text-slate-400 hover:text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>
@@ -635,17 +987,20 @@ function renderFamilyMembers() {
 
 function renderFamilyHeader() {
     document.getElementById('banner-greeting').textContent = `Selamat Sehat, ${APP_DATA.familyName}!`;
-    document.getElementById('banner-subgreeting').textContent = `Kepala Keluarga: ${APP_DATA.headName} • Menjaga ketahanan pangan & gizi seimbang lintas generasi.`;
+    document.getElementById('banner-subgreeting').textContent = `Kepala Keluarga: ${APP_DATA.headName} • Wilayah: Kec. ${APP_DATA.district}, ${APP_DATA.city}`;
+    document.getElementById('banner-location-badge').textContent = `Kec. ${APP_DATA.district}, ${APP_DATA.city}`;
+    document.getElementById('map-district-badge').textContent = `Kecamatan ${APP_DATA.district}`;
+    document.getElementById('map-header-sub').textContent = `Kecamatan ${APP_DATA.district}, ${APP_DATA.city}`;
 
     const authContainer = document.getElementById('auth-section');
     authContainer.innerHTML = `
-        <div onclick="openEditFamilyModal()" title="Klik untuk mengubah nama & kepala keluarga" class="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700 cursor-pointer group">
+        <div onclick="openEditFamilyModal()" title="Klik untuk Ubah Profil atau Keluar" class="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-700 cursor-pointer group">
             <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center font-bold text-xs group-hover:ring-2 group-hover:ring-emerald-500 transition">
                 ${APP_DATA.familyName.charAt(0) || 'K'}
             </div>
             <div class="hidden sm:block text-left">
                 <span class="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-emerald-600 block leading-tight">${APP_DATA.familyName}</span>
-                <span class="text-[9px] text-slate-400">${APP_DATA.headName}</span>
+                <span class="text-[9px] text-slate-400">Kec. ${APP_DATA.district}</span>
             </div>
             <i class="fa-solid fa-pen text-[10px] text-slate-400 group-hover:text-emerald-600 ml-1"></i>
         </div>
@@ -676,8 +1031,16 @@ function saveFamilyProfile(e) {
     }
 }
 
-function openAddMemberModal() { document.getElementById('member-modal').classList.remove('hidden'); }
-function closeAddMemberModal() { document.getElementById('member-modal').classList.add('hidden'); }
+function openAddMemberModal() {
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('new-member-dob').max = todayStr;
+    document.getElementById('member-dob-error').classList.add('hidden');
+    document.getElementById('member-modal').classList.remove('hidden');
+}
+
+function closeAddMemberModal() {
+    document.getElementById('member-modal').classList.add('hidden');
+}
 
 function saveNewFamilyMember(e) {
     e.preventDefault();
@@ -685,9 +1048,15 @@ function saveNewFamilyMember(e) {
     const dob = document.getElementById('new-member-dob').value;
     const disease = document.getElementById('new-member-disease').value;
 
+    if (!validateBirthYear(dob)) {
+        document.getElementById('member-dob-error').classList.remove('hidden');
+        alert("Data tidak sesuai. Tahun lahir tidak boleh melebihi tahun saat ini!");
+        return;
+    }
+
     if (name && dob) {
         APP_DATA.familyMembers.push({ id: Date.now(), name, dob, disease });
-        localStorage.setItem('pangan_members_v2', JSON.stringify(APP_DATA.familyMembers));
+        localStorage.setItem('pangan_members_v11', JSON.stringify(APP_DATA.familyMembers));
         renderFamilyMembers();
         renderDiseaseAlerts();
         closeAddMemberModal();
@@ -697,14 +1066,14 @@ function saveNewFamilyMember(e) {
 function removeFamilyMember(id) {
     if (confirm('Hapus anggota keluarga ini dari pemantauan gizi?')) {
         APP_DATA.familyMembers = APP_DATA.familyMembers.filter(m => m.id !== id);
-        localStorage.setItem('pangan_members_v2', JSON.stringify(APP_DATA.familyMembers));
+        localStorage.setItem('pangan_members_v11', JSON.stringify(APP_DATA.familyMembers));
         renderFamilyMembers();
         renderDiseaseAlerts();
     }
 }
 
 /* ==============================================================
-   10. PANDUAN GIZI DENGAN REKOMENDASI ANGGOTA & RESEP
+   10. PANDUAN GIZI 5 SIKLUS & REKOMENDASI RESEP
    ============================================================== */
 let activeCycle = 'balita';
 
@@ -728,7 +1097,6 @@ function setLifeCycle(cycle) {
     document.getElementById('cycle-prot').textContent = data.prot;
     document.getElementById('cycle-fruit').textContent = data.fruit;
 
-    // Tampilkan anggota keluarga mana saja yang berada pada siklus ini
     const membersInCycle = APP_DATA.familyMembers.filter(m => {
         const info = calculateAgeAndCycle(m.dob);
         return info.cycle === cycle;
@@ -748,12 +1116,11 @@ function setLifeCycle(cycle) {
         alertEl.innerHTML = `
             <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                 <i class="fa-solid fa-circle-info"></i>
-                <span>Saat ini belum ada anggota keluarga terdaftar pada kategori ${cycle}. Anda tetap dapat mempelajari panduan porsinya di bawah ini.</span>
+                <span>Belum ada anggota keluarga pada kategori ${cycle}. Anda tetap dapat mempelajari panduan porsinya di bawah ini.</span>
             </div>
         `;
     }
 
-    // Tampilkan 2 resep rekomendasi spesifik siklus ini
     const recommendedRecipes = RECIPES_15.filter(r => r.targetCycle === cycle || r.targetCycle === 'dewasa').slice(0, 2);
     const recContainer = document.getElementById('cycle-recipe-recommendation');
     recContainer.innerHTML = recommendedRecipes.map(r => `
@@ -768,7 +1135,7 @@ function setLifeCycle(cycle) {
 }
 
 /* ==============================================================
-   11. AKTIVITAS FISIK DENGAN DROPDOWN
+   11. AKTIVITAS FISIK & DROPDOWN LOG
    ============================================================== */
 function renderActivityLogs() {
     const container = document.getElementById('activity-logs-container');
@@ -781,7 +1148,7 @@ function renderActivityLogs() {
         return;
     }
 
-    APP_DATA.activityLogs.forEach((act, idx) => {
+    APP_DATA.activityLogs.forEach((act) => {
         const item = document.createElement('div');
         item.className = 'p-1.5 rounded-lg bg-slate-50 dark:bg-slate-700/40 flex justify-between items-center';
         item.innerHTML = `
@@ -808,55 +1175,115 @@ function logDropdownActivity() {
 }
 
 /* ==============================================================
-   12. PETA LEAFLET DENGAN TITIK RUMAH & FILTER JELAS
+   12. PETA LEAFLET BERBASIS KECAMATAN TERPILIH & GOOGLE MAPS
    ============================================================== */
 let leafletMap = null;
 let mapMarkers = [];
 
+function generateDistrictPOIs(baseCoords, districtName, cityName) {
+    // Generate titik fasilitas lokal persis di dalam wilayah kecamatan terpilih
+    const offset = 0.005;
+    return [
+        {
+            name: `Pasar Tradisional & Inpres Kec. ${districtName}`,
+            type: "pasar",
+            lat: baseCoords.lat + offset,
+            lng: baseCoords.lng + offset,
+            desc: `Pasar rakyat penyedia sayur mayur dan pangan segar di Kecamatan ${districtName}.`,
+            query: `Pasar Tradisional Kecamatan ${districtName} ${cityName}`
+        },
+        {
+            name: `Gerai Pangan Murah BAPANAS Kec. ${districtName}`,
+            type: "pasar",
+            lat: baseCoords.lat - (offset * 0.8),
+            lng: baseCoords.lng + offset,
+            desc: `Titik distribusi beras SPHP subsidi dan minyak goreng di wilayah ${districtName}.`,
+            query: `Pangan Murah ${districtName} ${cityName}`
+        },
+        {
+            name: `Kebun Gizi & Hidroponik Warga Kec. ${districtName}`,
+            type: "kebun",
+            lat: baseCoords.lat + (offset * 0.6),
+            lng: baseCoords.lng - offset,
+            desc: `Pemberdayaan kebun sayur hidroponik daun kelor mandiri warga ${districtName}.`,
+            query: `Kebun Komunitas ${districtName} ${cityName}`
+        },
+        {
+            name: `Puskesmas & Posko Gizi Terpadu Kec. ${districtName}`,
+            type: "posko",
+            lat: baseCoords.lat - (offset * 0.6),
+            lng: baseCoords.lng - (offset * 0.7),
+            desc: `Posko pemantauan tumbuh kembang balita dan gizi lansia Kecamatan ${districtName}.`,
+            query: `Puskesmas Kecamatan ${districtName} ${cityName}`
+        }
+    ];
+}
+
 function initLeafletMap() {
-    if (leafletMap) return;
+    const baseCoords = APP_DATA.districtCoords || { lat: -6.2444, lng: 106.7997 };
+    const districtName = APP_DATA.district || "Kebayoran Baru";
+    const cityName = APP_DATA.city || "Jakarta Selatan";
 
-    // Ambil koordinat rumah sesuai pilihan
-    const homeLoc = HOME_COORDINATES[APP_DATA.homeLocKey] || HOME_COORDINATES.loc1;
+    if (!leafletMap) {
+        leafletMap = L.map('map').setView([baseCoords.lat, baseCoords.lng], 14);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(leafletMap);
+    } else {
+        leafletMap.setView([baseCoords.lat, baseCoords.lng], 14);
+        mapMarkers.forEach(m => leafletMap.removeLayer(m));
+        mapMarkers = [];
+    }
 
-    leafletMap = L.map('map').setView([homeLoc.lat, homeLoc.lng], 14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(leafletMap);
-
-    // Pasang Titik Rumah Anda dengan Pin Khusus
+    // 1. Pasang Pin Rumah Anda di Kecamatan Terpilih
     const homeIcon = L.divIcon({
         className: 'custom-home-icon',
-        html: `<div style="background:#059669; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(0,0,0,0.3); border:2px solid #fff;"><i class="fa-solid fa-house" style="font-size:14px;"></i></div>`,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17]
+        html: `<div style="background:#059669; color:#fff; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,0.35); border:2.5px solid #fff;"><i class="fa-solid fa-house" style="font-size:15px;"></i></div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
     });
 
-    const homeMarker = L.marker([homeLoc.lat, homeLoc.lng], { icon: homeIcon }).addTo(leafletMap);
+    const homeGmapsLink = `https://www.google.com/maps/search/?api=1&query=${baseCoords.lat},${baseCoords.lng}`;
+
+    const homeMarker = L.marker([baseCoords.lat, baseCoords.lng], { icon: homeIcon }).addTo(leafletMap);
     homeMarker.bindPopup(`
-        <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px;">
-            <span style="font-size:10px; font-weight:800; color:#059669;">RUMAH KELUARGA</span>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; min-width:180px;">
+            <span style="font-size:10px; font-weight:800; color:#059669; text-transform:uppercase;">🏠 RUMAH ANDA</span>
             <h4 style="font-weight:bold; margin:2px 0;">${APP_DATA.familyName}</h4>
-            <p style="color:#64748b; font-size:11px; margin:0;">${homeLoc.name} - ${homeLoc.desc}</p>
+            <p style="color:#64748b; font-size:11px; margin:0 0 6px 0;">${APP_DATA.address}, Kec. ${districtName}</p>
+            <a href="${homeGmapsLink}" target="_blank" style="display:inline-block; font-size:10px; font-weight:bold; color:#059669; text-decoration:underline;">
+                Buka Lokasi di Google Maps ↗
+            </a>
         </div>
     `);
     homeMarker.locType = 'home';
     mapMarkers.push(homeMarker);
 
-    // Pasang Titik Fasilitas Publik
-    PUBLIC_LOCATIONS.forEach(loc => {
-        const marker = L.marker([loc.lat, loc.lng]).addTo(leafletMap);
-        const typeLabel = loc.type === 'pasar' ? '🛒 Pasar Murah' : loc.type === 'kebun' ? '🌿 Kebun Gizi' : '🏥 Posko Gizi';
+    // 2. Pasang Titik Pasar & Fasilitas Publik Khusus di Kecamatan Ini
+    const pois = generateDistrictPOIs(baseCoords, districtName, cityName);
+    pois.forEach(p => {
+        const marker = L.marker([p.lat, p.lng]).addTo(leafletMap);
+        const typeLabel = p.type === 'pasar' ? '🛒 Pasar Murah' : p.type === 'kebun' ? '🌿 Kebun Gizi' : '🏥 Posko Gizi';
+        const gmapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.query)}`;
+
         marker.bindPopup(`
-            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px;">
-                <span style="font-size:10px; font-weight:bold; color:#059669; text-transform:uppercase;">${typeLabel}</span>
-                <h4 style="font-weight:bold; margin:2px 0;">${loc.name}</h4>
-                <p style="color:#64748b; font-size:11px; margin:0;">${loc.desc}</p>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; min-width:190px;">
+                <span style="font-size:10px; font-weight:800; color:#059669; text-transform:uppercase;">${typeLabel}</span>
+                <h4 style="font-weight:bold; margin:2px 0 4px 0;">${p.name}</h4>
+                <p style="color:#64748b; font-size:11px; margin:0 0 6px 0;">${p.desc}</p>
+                <a href="${gmapsLink}" target="_blank" style="display:inline-block; font-size:10px; font-weight:bold; color:#0284c7; text-decoration:underline;">
+                    Buka di Google Maps ↗
+                </a>
             </div>
         `);
-        marker.locType = loc.type;
+        marker.locType = p.type;
         mapMarkers.push(marker);
     });
+
+    // Perbaiki rendering tile jika map baru muncul
+    setTimeout(() => {
+        if (leafletMap) leafletMap.invalidateSize();
+    }, 200);
 }
 
 function filterMap(type) {
@@ -880,7 +1307,7 @@ function filterMap(type) {
 }
 
 /* ==============================================================
-   13. NAVIGASI, RESEP & FORUM WARGA
+   13. NAVIGASI, RESEP & FORUM
    ============================================================== */
 function navigate(pageId) {
     const pages = ['beranda', 'gizi', 'ekonomi', 'resep', 'edukasi', 'komunitas'];
@@ -906,7 +1333,6 @@ function navigate(pageId) {
     if (pageId === 'komunitas') {
         setTimeout(() => {
             initLeafletMap();
-            if (leafletMap) leafletMap.invalidateSize();
         }, 150);
     }
 }
@@ -991,7 +1417,7 @@ function nextCookingStep() {
         updateCookingStepUI();
     } else {
         confetti({ particleCount: 70, spread: 70 });
-        alert('Selamat! Menu sehat bernutrisi berhasil disiapkan.');
+        alert('Selamat! Hidangan sehat keluarga berhasil dimasak dengan sempurna!');
         closeCookingMode();
     }
 }
@@ -1025,9 +1451,6 @@ function resetCookTimer() {
     document.getElementById('btn-start-cook-timer').textContent = 'Mulai Timer';
 }
 
-/* ==============================================================
-   14. FORUM RUANG BERBAGI DENGAN TANGGAPI
-   ============================================================== */
 function renderForum() {
     const container = document.getElementById('forum-posts-container');
     container.innerHTML = '';
@@ -1098,7 +1521,7 @@ function submitReply(postId) {
     if (post) {
         if (!post.comments) post.comments = [];
         post.comments.push({ author, text, time: "Baru saja" });
-        localStorage.setItem('pangan_forum_v2', JSON.stringify(APP_DATA.forumPosts));
+        localStorage.setItem('pangan_forum_v11', JSON.stringify(APP_DATA.forumPosts));
         renderForum();
     }
 }
@@ -1116,7 +1539,7 @@ function addForumPost(e) {
         comments: []
     };
     APP_DATA.forumPosts.unshift(newPost);
-    localStorage.setItem('pangan_forum_v2', JSON.stringify(APP_DATA.forumPosts));
+    localStorage.setItem('pangan_forum_v11', JSON.stringify(APP_DATA.forumPosts));
     document.getElementById('forum-content').value = '';
     document.getElementById('forum-author').value = '';
     renderForum();
@@ -1126,13 +1549,13 @@ function likePost(id) {
     const p = APP_DATA.forumPosts.find(x => x.id === id);
     if (p) {
         p.likes++;
-        localStorage.setItem('pangan_forum_v2', JSON.stringify(APP_DATA.forumPosts));
+        localStorage.setItem('pangan_forum_v11', JSON.stringify(APP_DATA.forumPosts));
         renderForum();
     }
 }
 
 /* ==============================================================
-   15. GAME QUIZ & HIDRASI / BELANJA
+   14. GAME QUIZ & HIDRASI / BELANJA
    ============================================================== */
 let gameIndex = 0;
 let gameScore = 0;
@@ -1158,7 +1581,7 @@ function submitGameAnswer(ans) {
         document.getElementById('game-food-desc').textContent = next.desc;
     } else {
         confetti({ particleCount: 100, spread: 80 });
-        alert(`Misi Kuis Gizi Selesai! Skor Akhir Anda: ${gameScore} XP!`);
+        alert(`Misi Kuis Selesai! Skor Akhir Anda: ${gameScore} XP!`);
         gameIndex = 0;
         gameScore = 0;
         document.getElementById('game-round').textContent = 1;
@@ -1274,22 +1697,23 @@ function deleteShoppingItem(id) {
 
 function toggleDarkMode() {
     const html = document.documentElement;
-    const icon = document.getElementById('theme-icon');
+    const icons = document.querySelectorAll('.theme-icon');
+    
     if (html.classList.contains('dark')) {
         html.classList.remove('dark');
         html.classList.add('light');
         localStorage.setItem('pangan_theme', 'light');
-        icon.className = 'fa-solid fa-moon';
+        icons.forEach(i => i.className = 'theme-icon fa-solid fa-moon');
     } else {
         html.classList.add('dark');
         html.classList.remove('light');
         localStorage.setItem('pangan_theme', 'dark');
-        icon.className = 'fa-solid fa-sun';
+        icons.forEach(i => i.className = 'theme-icon fa-solid fa-sun');
     }
 }
 
 /* ==============================================================
-   16. INISIALISASI DASHBOARD
+   15. INISIALISASI DASHBOARD
    ============================================================== */
 function initDashboardData() {
     renderFamilyHeader();
